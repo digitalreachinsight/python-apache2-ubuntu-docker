@@ -1,19 +1,41 @@
 #!/bin/bash
 
+rm -rf /etc/webconfs/apache
+rm -rf /var/web/
+rm -rf /etc/postfix-conf
 ln -s /shared-mount/apache-web-config/ /etc/webconfs/apache
-ln -s /shared-mount/web/ /var/web/
+ln -s /shared-mount/web/ /var/web
 ln -s /shared-mount/postfix-conf /etc/postfix-conf
-
+touch /etc/webconfs/apache/blank.conf
 # Start the first process
 env > /etc/.cronenv
 rm /etc/cron.d/dockercron
 ln -s /shared-mount/dockercron /etc/cron.d/dockercron
 
 
+
+
+
+
+
+
+service syslog-ng start &
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Failed to start syslog-ng: $status"
+  exit $status
+fi
+
+
+service postfix start &
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Failed to start postfix: $status"
+  exit $status
+fi
+
 # Start the first process
 env > /etc/.cronenv
-rm /etc/cron.d/dockercron
-ln -s /etc/contanercron/dockercron /etc/cron.d/dockercron
 service cron start &
 status=$?
 if [ $status -ne 0 ]; then
